@@ -1,0 +1,4 @@
+../Core/Src/7seg.c:55:13:TurnOffAllDigits	8	static
+../Core/Src/7seg.c:61:13:Write7SegBus	16	static
+../Core/Src/7seg.c:73:6:Set7SegHexByte	24	static
+../Core/Src/7seg.c:82:6:Run7SegDisplay	8	static

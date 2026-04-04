@@ -1,0 +1,3 @@
+../Core/Src/ledbar.c:29:13:LEDBar_WriteByte	1
+../Core/Src/ledbar.c:41:6:LEDBar_SetMode	1
+../Core/Src/ledbar.c:51:6:LEDBar_RunStep	11

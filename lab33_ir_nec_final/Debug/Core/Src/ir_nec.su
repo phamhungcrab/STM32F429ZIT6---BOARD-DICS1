@@ -1,0 +1,6 @@
+../Core/Src/ir_nec.c:31:13:IR_NEC_ResetState	4	static
+../Core/Src/ir_nec.c:38:6:IR_NEC_Init	16	static
+../Core/Src/ir_nec.c:52:17:IR_NEC_GetTickUS	4	static
+../Core/Src/ir_nec.c:62:6:IR_NEC_OnFallingEdge	16	static
+../Core/Src/ir_nec.c:137:16:IR_NEC_GetFrame	16	static
+../Core/Src/ir_nec.c:142:6:IR_NEC_ClearFrame	4	static
