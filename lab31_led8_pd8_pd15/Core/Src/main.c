@@ -289,7 +289,7 @@ int main(void)
       }
     }
 
-    HAL_Delay(100);   // chỉnh tốc độ hiệu ứng ở đây
+    HAL_Delay(60);   // chỉnh tốc độ hiệu ứng ở đây
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

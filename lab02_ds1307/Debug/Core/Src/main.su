@@ -1,0 +1,14 @@
+../Core/Src/main.c:105:16:DecToBcd	16	static
+../Core/Src/main.c:110:16:BcdToDec	16	static
+../Core/Src/main.c:115:19:SetTime	40	static
+../Core/Src/main.c:130:19:GetTime	40	static
+../Core/Src/main.c:152:6:SaveLog	16	static
+../Core/Src/main.c:162:6:ProcessUartCommand	224	static
+../Core/Src/main.c:234:5:main	120	static
+../Core/Src/main.c:433:6:SystemClock_Config	88	static
+../Core/Src/main.c:486:13:MX_I2C3_Init	8	static
+../Core/Src/main.c:534:13:MX_SPI4_Init	8	static
+../Core/Src/main.c:572:13:MX_USART1_UART_Init	8	static
+../Core/Src/main.c:605:13:MX_GPIO_Init	48	static
+../Core/Src/main.c:645:6:HAL_UART_RxCpltCallback	16	static
+../Core/Src/main.c:674:6:Error_Handler	4	static,ignoring_inline_asm

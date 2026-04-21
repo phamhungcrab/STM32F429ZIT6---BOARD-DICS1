@@ -864,8 +864,8 @@ int main(void)
       }
     }
 
-    HAL_Delay(100);   // chỉnh tốc độ hiệu ứng ở đây
- 80007c8:	2064      	movs	r0, #100	@ 0x64
+    HAL_Delay(60);   // chỉnh tốc độ hiệu ứng ở đây
+ 80007c8:	203c      	movs	r0, #60	@ 0x3c
  80007ca:	f000 f9a3 	bl	8000b14 <HAL_Delay>
     if (DisplayLEDs(mode_list[mode_index]))
  80007ce:	e7e0      	b.n	8000792 <main+0x1e>
