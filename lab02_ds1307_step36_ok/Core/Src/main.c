@@ -162,10 +162,10 @@ int main(void)
   set_time.sec = 10;
   set_time.min = 30;
   set_time.hour = 7;
-  set_time.weekday = 1;
-  set_time.day = 17;
-  set_time.month = 4;
-  set_time.year = 25;
+  set_time.weekday = 2;
+  set_time.day = 10;
+  set_time.month = 5;
+  set_time.year = 26;
 
   #if DS1307_SET_TIME_ONCE
   SetTime(&set_time);
@@ -271,7 +271,7 @@ static void MX_I2C3_Init(void)
 
   /* USER CODE END I2C3_Init 1 */
   hi2c3.Instance = I2C3;
-  hi2c3.Init.ClockSpeed = 400000;
+  hi2c3.Init.ClockSpeed = 100000;
   hi2c3.Init.DutyCycle = I2C_DUTYCYCLE_2;
   hi2c3.Init.OwnAddress1 = 0;
   hi2c3.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;

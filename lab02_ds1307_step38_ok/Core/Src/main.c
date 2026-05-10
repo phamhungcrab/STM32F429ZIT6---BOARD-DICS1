@@ -36,7 +36,7 @@
 /* USER CODE BEGIN PD */
 #define DS1307_ADDR_WRITE 0xD0
 #define DS1307_ADDR_READ  0xD1
-#define DS1307_SET_TIME_ONCE 1
+#define DS1307_SET_TIME_ONCE 0
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -160,28 +160,19 @@ int main(void)
   MX_SPI4_Init();
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
-  struct Time set_time, get_time;
   char buff[50];
-
-  set_time.sec = 10;
-  set_time.min = 30;
-  set_time.hour = 7;
-  set_time.weekday = 1;
-  set_time.day = 17;
-  set_time.month = 4;
-  set_time.year = 25;
-
-  #if DS1307_SET_TIME_ONCE
-  SetTime(&set_time);
-  #endif
 
   if (SH1106_Init())
   {
-    sprintf(buff, "%s", "RC522 RFID");
+    SH1106_Fill(SH1106_COLOR_BLACK);
     SH1106_GotoXY(12, 10);
-    SH1106_Puts(buff, &Font_11x18, 1);
+    SH1106_Puts("RC522 RFID", &Font_11x18, SH1106_COLOR_WHITE);
+    SH1106_GotoXY(0, 35);
+    SH1106_Puts("Scan your card", &Font_7x10, SH1106_COLOR_WHITE);
     SH1106_UpdateScreen();
-    HAL_Delay(1000);
+
+    sprintf(buff, "SH1106 OK\r\n");
+    HAL_UART_Transmit(&huart1, (uint8_t *)buff, strlen(buff), 1000);
   }
   else
   {
@@ -189,7 +180,13 @@ int main(void)
     HAL_UART_Transmit(&huart1, (uint8_t *)buff, strlen(buff), 1000);
   }
 
+  HAL_Delay(100);
+
   TM_MFRC522_Init();
+  HAL_Delay(50);
+
+  sprintf(buff, "RC522 init done\r\n");
+  HAL_UART_Transmit(&huart1, (uint8_t *)buff, strlen(buff), 1000);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -199,6 +196,22 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+//	  uint8_t CardID[5];
+//	  char buf[100];
+//
+//	  if (TM_MFRC522_Check(CardID) == MI_OK)
+//	  {
+//	    sprintf(buf, "CARD FOUND: %02X %02X %02X %02X %02X\r\n",
+//	            CardID[0], CardID[1], CardID[2], CardID[3], CardID[4]);
+//	    HAL_UART_Transmit(&huart1, (uint8_t *)buf, strlen(buf), 1000);
+//	  }
+//	  else
+//	  {
+//	    sprintf(buf, "NO CARD\r\n");
+//	    HAL_UART_Transmit(&huart1, (uint8_t *)buf, strlen(buf), 1000);
+//	  }
+//
+//	  HAL_Delay(500);
 	  if (TM_MFRC522_Check(rfid_id) == MI_OK)
 	  {
 	    SH1106_Fill(SH1106_COLOR_BLACK);
@@ -354,7 +367,7 @@ static void MX_SPI4_Init(void)
   hspi4.Init.CLKPolarity = SPI_POLARITY_LOW;
   hspi4.Init.CLKPhase = SPI_PHASE_1EDGE;
   hspi4.Init.NSS = SPI_NSS_SOFT;
-  hspi4.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
+  hspi4.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_16;
   hspi4.Init.FirstBit = SPI_FIRSTBIT_MSB;
   hspi4.Init.TIMode = SPI_TIMODE_DISABLE;
   hspi4.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;

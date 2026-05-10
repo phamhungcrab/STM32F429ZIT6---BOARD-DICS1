@@ -41,13 +41,13 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING, OCTETS
  18 .debug_line   0000ea82  00000000  00000000  00038fa8  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .debug_str    000d5fcd  00000000  00000000  00047a2a  2**0
+ 19 .debug_str    000d5ff3  00000000  00000000  00047a2a  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 20 .comment      00000043  00000000  00000000  0011d9f7  2**0
+ 20 .comment      00000043  00000000  00000000  0011da1d  2**0
                   CONTENTS, READONLY
- 21 .debug_frame  000035bc  00000000  00000000  0011da3c  2**2
+ 21 .debug_frame  000035bc  00000000  00000000  0011da60  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 22 .debug_line_str 00000044  00000000  00000000  00120ff8  2**0
+ 22 .debug_line_str 00000044  00000000  00000000  0012101c  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -441,18 +441,18 @@ Disassembly of section .text:
  80005ca:	bf00      	nop
 
 080005cc <DecToBcd>:
+/* USER CODE END PFP */
 
-typedef struct
+/* Private user code ---------------------------------------------------------*/
+/* USER CODE BEGIN 0 */
+static uint8_t DecToBcd(uint8_t val)
 {
-  struct Time time;
-  uint8_t uid[5];
-} LogEntry_t;
  80005cc:	b480      	push	{r7}
  80005ce:	b083      	sub	sp, #12
  80005d0:	af00      	add	r7, sp, #0
  80005d2:	4603      	mov	r3, r0
  80005d4:	71fb      	strb	r3, [r7, #7]
-
+  return ((val / 10) << 4) | (val % 10);
  80005d6:	79fb      	ldrb	r3, [r7, #7]
  80005d8:	4a0e      	ldr	r2, [pc, #56]	@ (8000614 <DecToBcd+0x48>)
  80005da:	fba2 2303 	umull	r2, r3, r2, r3
@@ -475,7 +475,7 @@ typedef struct
  8000600:	4303      	orrs	r3, r0
  8000602:	b25b      	sxtb	r3, r3
  8000604:	b2db      	uxtb	r3, r3
-LogEntry_t access_log[100];
+}
  8000606:	4618      	mov	r0, r3
  8000608:	370c      	adds	r7, #12
  800060a:	46bd      	mov	sp, r7
@@ -485,15 +485,15 @@ LogEntry_t access_log[100];
  8000614:	cccccccd 	.word	0xcccccccd
 
 08000618 <BcdToDec>:
-uint8_t log_count = 0;
 
-uint8_t uart_rx_char;
+static uint8_t BcdToDec(uint8_t val)
+{
  8000618:	b480      	push	{r7}
  800061a:	b083      	sub	sp, #12
  800061c:	af00      	add	r7, sp, #0
  800061e:	4603      	mov	r3, r0
  8000620:	71fb      	strb	r3, [r7, #7]
-char uart_cmd[32];
+  return ((val >> 4) * 10) + (val & 0x0F);
  8000622:	79fb      	ldrb	r3, [r7, #7]
  8000624:	091b      	lsrs	r3, r3, #4
  8000626:	b2db      	uxtb	r3, r3
@@ -507,7 +507,7 @@ char uart_cmd[32];
  8000638:	b2db      	uxtb	r3, r3
  800063a:	4413      	add	r3, r2
  800063c:	b2db      	uxtb	r3, r3
-uint8_t uart_cmd_index = 0;
+}
  800063e:	4618      	mov	r0, r3
  8000640:	370c      	adds	r7, #12
  8000642:	46bd      	mov	sp, r7
@@ -516,16 +516,16 @@ uint8_t uart_cmd_index = 0;
 	...
 
 0800064c <SetTime>:
-uint8_t uart_cmd_ready = 0;
-/* USER CODE END PV */
 
+HAL_StatusTypeDef SetTime(struct Time *t)
+{
  800064c:	b580      	push	{r7, lr}
  800064e:	b088      	sub	sp, #32
  8000650:	af04      	add	r7, sp, #16
  8000652:	6078      	str	r0, [r7, #4]
-/* Private function prototypes -----------------------------------------------*/
-void SystemClock_Config(void);
-static void MX_GPIO_Init(void);
+  uint8_t data[7];
+
+  data[0] = DecToBcd(t->sec) & 0x7F;
  8000654:	687b      	ldr	r3, [r7, #4]
  8000656:	781b      	ldrb	r3, [r3, #0]
  8000658:	4618      	mov	r0, r3
@@ -534,50 +534,50 @@ static void MX_GPIO_Init(void);
  8000660:	f003 037f 	and.w	r3, r3, #127	@ 0x7f
  8000664:	b2db      	uxtb	r3, r3
  8000666:	723b      	strb	r3, [r7, #8]
-static void MX_I2C3_Init(void);
+  data[1] = DecToBcd(t->min);
  8000668:	687b      	ldr	r3, [r7, #4]
  800066a:	785b      	ldrb	r3, [r3, #1]
  800066c:	4618      	mov	r0, r3
  800066e:	f7ff ffad 	bl	80005cc <DecToBcd>
  8000672:	4603      	mov	r3, r0
  8000674:	727b      	strb	r3, [r7, #9]
-static void MX_SPI4_Init(void);
+  data[2] = DecToBcd(t->hour);
  8000676:	687b      	ldr	r3, [r7, #4]
  8000678:	789b      	ldrb	r3, [r3, #2]
  800067a:	4618      	mov	r0, r3
  800067c:	f7ff ffa6 	bl	80005cc <DecToBcd>
  8000680:	4603      	mov	r3, r0
  8000682:	72bb      	strb	r3, [r7, #10]
-static void MX_USART1_UART_Init(void);
+  data[3] = DecToBcd(t->weekday);
  8000684:	687b      	ldr	r3, [r7, #4]
  8000686:	78db      	ldrb	r3, [r3, #3]
  8000688:	4618      	mov	r0, r3
  800068a:	f7ff ff9f 	bl	80005cc <DecToBcd>
  800068e:	4603      	mov	r3, r0
  8000690:	72fb      	strb	r3, [r7, #11]
-/* USER CODE BEGIN PFP */
+  data[4] = DecToBcd(t->day);
  8000692:	687b      	ldr	r3, [r7, #4]
  8000694:	791b      	ldrb	r3, [r3, #4]
  8000696:	4618      	mov	r0, r3
  8000698:	f7ff ff98 	bl	80005cc <DecToBcd>
  800069c:	4603      	mov	r3, r0
  800069e:	733b      	strb	r3, [r7, #12]
-HAL_StatusTypeDef SetTime(struct Time *t);
+  data[5] = DecToBcd(t->month);
  80006a0:	687b      	ldr	r3, [r7, #4]
  80006a2:	795b      	ldrb	r3, [r3, #5]
  80006a4:	4618      	mov	r0, r3
  80006a6:	f7ff ff91 	bl	80005cc <DecToBcd>
  80006aa:	4603      	mov	r3, r0
  80006ac:	737b      	strb	r3, [r7, #13]
-HAL_StatusTypeDef GetTime(struct Time *t);
+  data[6] = DecToBcd(t->year);
  80006ae:	687b      	ldr	r3, [r7, #4]
  80006b0:	799b      	ldrb	r3, [r3, #6]
  80006b2:	4618      	mov	r0, r3
  80006b4:	f7ff ff8a 	bl	80005cc <DecToBcd>
  80006b8:	4603      	mov	r3, r0
  80006ba:	73bb      	strb	r3, [r7, #14]
-void SaveLog(struct Time *t, uint8_t *uid);
-void ProcessUartCommand(void);
+
+  return HAL_I2C_Mem_Write(&hi2c3, DS1307_ADDR_WRITE, 0x00, I2C_MEMADD_SIZE_8BIT, data, 7, 1000);
  80006bc:	f44f 737a 	mov.w	r3, #1000	@ 0x3e8
  80006c0:	9302      	str	r3, [sp, #8]
  80006c2:	2307      	movs	r3, #7
@@ -590,7 +590,7 @@ void ProcessUartCommand(void);
  80006d2:	4804      	ldr	r0, [pc, #16]	@ (80006e4 <SetTime+0x98>)
  80006d4:	f001 f8a8 	bl	8001828 <HAL_I2C_Mem_Write>
  80006d8:	4603      	mov	r3, r0
-/* USER CODE END PFP */
+}
  80006da:	4618      	mov	r0, r3
  80006dc:	3710      	adds	r7, #16
  80006de:	46bd      	mov	sp, r7
@@ -600,16 +600,16 @@ void ProcessUartCommand(void);
 
 080006e8 <GetTime>:
 
-/* Private user code ---------------------------------------------------------*/
-/* USER CODE BEGIN 0 */
+HAL_StatusTypeDef GetTime(struct Time *t)
+{
  80006e8:	b580      	push	{r7, lr}
  80006ea:	b088      	sub	sp, #32
  80006ec:	af04      	add	r7, sp, #16
  80006ee:	6078      	str	r0, [r7, #4]
-static uint8_t DecToBcd(uint8_t val)
-{
-  return ((val / 10) << 4) | (val % 10);
-}
+  uint8_t data[7];
+  HAL_StatusTypeDef ret;
+
+  ret = HAL_I2C_Mem_Read(&hi2c3, DS1307_ADDR_READ, 0x00, I2C_MEMADD_SIZE_8BIT, data, 7, 1000);
  80006f0:	f44f 737a 	mov.w	r3, #1000	@ 0x3e8
  80006f4:	9302      	str	r3, [sp, #8]
  80006f6:	2307      	movs	r3, #7
@@ -623,17 +623,17 @@ static uint8_t DecToBcd(uint8_t val)
  8000708:	f001 f988 	bl	8001a1c <HAL_I2C_Mem_Read>
  800070c:	4603      	mov	r3, r0
  800070e:	73fb      	strb	r3, [r7, #15]
-
+  if (ret != HAL_OK)
  8000710:	7bfb      	ldrb	r3, [r7, #15]
  8000712:	2b00      	cmp	r3, #0
  8000714:	d001      	beq.n	800071a <GetTime+0x32>
-static uint8_t BcdToDec(uint8_t val)
-{
+  {
+    return ret;
  8000716:	7bfb      	ldrb	r3, [r7, #15]
  8000718:	e04a      	b.n	80007b0 <GetTime+0xc8>
-  return ((val >> 4) * 10) + (val & 0x0F);
-}
+  }
 
+  t->sec     = BcdToDec(data[0] & 0x7F);
  800071a:	7a3b      	ldrb	r3, [r7, #8]
  800071c:	f003 037f 	and.w	r3, r3, #127	@ 0x7f
  8000720:	b2db      	uxtb	r3, r3
@@ -643,7 +643,7 @@ static uint8_t BcdToDec(uint8_t val)
  800072a:	461a      	mov	r2, r3
  800072c:	687b      	ldr	r3, [r7, #4]
  800072e:	701a      	strb	r2, [r3, #0]
-HAL_StatusTypeDef SetTime(struct Time *t)
+  t->min     = BcdToDec(data[1] & 0x7F);
  8000730:	7a7b      	ldrb	r3, [r7, #9]
  8000732:	f003 037f 	and.w	r3, r3, #127	@ 0x7f
  8000736:	b2db      	uxtb	r3, r3
@@ -653,7 +653,7 @@ HAL_StatusTypeDef SetTime(struct Time *t)
  8000740:	461a      	mov	r2, r3
  8000742:	687b      	ldr	r3, [r7, #4]
  8000744:	705a      	strb	r2, [r3, #1]
-{
+  t->hour    = BcdToDec(data[2] & 0x3F);
  8000746:	7abb      	ldrb	r3, [r7, #10]
  8000748:	f003 033f 	and.w	r3, r3, #63	@ 0x3f
  800074c:	b2db      	uxtb	r3, r3
@@ -663,7 +663,7 @@ HAL_StatusTypeDef SetTime(struct Time *t)
  8000756:	461a      	mov	r2, r3
  8000758:	687b      	ldr	r3, [r7, #4]
  800075a:	709a      	strb	r2, [r3, #2]
-  uint8_t data[7];
+  t->weekday = BcdToDec(data[3] & 0x07);
  800075c:	7afb      	ldrb	r3, [r7, #11]
  800075e:	f003 0307 	and.w	r3, r3, #7
  8000762:	b2db      	uxtb	r3, r3
@@ -673,7 +673,7 @@ HAL_StatusTypeDef SetTime(struct Time *t)
  800076c:	461a      	mov	r2, r3
  800076e:	687b      	ldr	r3, [r7, #4]
  8000770:	70da      	strb	r2, [r3, #3]
-
+  t->day     = BcdToDec(data[4] & 0x3F);
  8000772:	7b3b      	ldrb	r3, [r7, #12]
  8000774:	f003 033f 	and.w	r3, r3, #63	@ 0x3f
  8000778:	b2db      	uxtb	r3, r3
@@ -683,7 +683,7 @@ HAL_StatusTypeDef SetTime(struct Time *t)
  8000782:	461a      	mov	r2, r3
  8000784:	687b      	ldr	r3, [r7, #4]
  8000786:	711a      	strb	r2, [r3, #4]
-  data[0] = DecToBcd(t->sec) & 0x7F;
+  t->month   = BcdToDec(data[5] & 0x1F);
  8000788:	7b7b      	ldrb	r3, [r7, #13]
  800078a:	f003 031f 	and.w	r3, r3, #31
  800078e:	b2db      	uxtb	r3, r3
@@ -693,7 +693,7 @@ HAL_StatusTypeDef SetTime(struct Time *t)
  8000798:	461a      	mov	r2, r3
  800079a:	687b      	ldr	r3, [r7, #4]
  800079c:	715a      	strb	r2, [r3, #5]
-  data[1] = DecToBcd(t->min);
+  t->year    = BcdToDec(data[6]);
  800079e:	7bbb      	ldrb	r3, [r7, #14]
  80007a0:	4618      	mov	r0, r3
  80007a2:	f7ff ff39 	bl	8000618 <BcdToDec>
@@ -701,10 +701,10 @@ HAL_StatusTypeDef SetTime(struct Time *t)
  80007a8:	461a      	mov	r2, r3
  80007aa:	687b      	ldr	r3, [r7, #4]
  80007ac:	719a      	strb	r2, [r3, #6]
-  data[2] = DecToBcd(t->hour);
-  data[3] = DecToBcd(t->weekday);
+
+  return HAL_OK;
  80007ae:	2300      	movs	r3, #0
-  data[4] = DecToBcd(t->day);
+}
  80007b0:	4618      	mov	r0, r3
  80007b2:	3710      	adds	r7, #16
  80007b4:	46bd      	mov	sp, r7
@@ -712,108 +712,108 @@ HAL_StatusTypeDef SetTime(struct Time *t)
  80007b8:	20000078 	.word	0x20000078
 
 080007bc <main>:
-
-  return HAL_I2C_Mem_Write(&hi2c3, DS1307_ADDR_WRITE, 0x00, I2C_MEMADD_SIZE_8BIT, data, 7, 1000);
-}
-
-HAL_StatusTypeDef GetTime(struct Time *t)
+/**
+  * @brief  The application entry point.
+  * @retval int
+  */
+int main(void)
 {
  80007bc:	b5f0      	push	{r4, r5, r6, r7, lr}
  80007be:	b099      	sub	sp, #100	@ 0x64
  80007c0:	af06      	add	r7, sp, #24
-  ret = HAL_I2C_Mem_Read(&hi2c3, DS1307_ADDR_READ, 0x00, I2C_MEMADD_SIZE_8BIT, data, 7, 1000);
-  if (ret != HAL_OK)
-  {
-    return ret;
-  }
+  /* USER CODE END 1 */
 
+  /* MCU Configuration--------------------------------------------------------*/
+
+  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
+  HAL_Init();
  80007c2:	f000 fbab 	bl	8000f1c <HAL_Init>
-  t->min     = BcdToDec(data[1] & 0x7F);
-  t->hour    = BcdToDec(data[2] & 0x3F);
-  t->weekday = BcdToDec(data[3] & 0x07);
-  t->day     = BcdToDec(data[4] & 0x3F);
-  t->month   = BcdToDec(data[5] & 0x1F);
-  t->year    = BcdToDec(data[6]);
+  /* USER CODE BEGIN Init */
+
+  /* USER CODE END Init */
+
+  /* Configure the system clock */
+  SystemClock_Config();
  80007c6:	f000 f871 	bl	80008ac <SystemClock_Config>
-  return HAL_OK;
-}
+  /* USER CODE BEGIN SysInit */
 
-void SaveLog(struct Time *t, uint8_t *uid)
-{
-  if (log_count < 100)
+  /* USER CODE END SysInit */
+
+  /* Initialize all configured peripherals */
+  MX_GPIO_Init();
  80007ca:	f000 f97f 	bl	8000acc <MX_GPIO_Init>
-  {
+  MX_I2C3_Init();
  80007ce:	f000 f8dd 	bl	800098c <MX_I2C3_Init>
-    access_log[log_count].time = *t;
+  MX_SPI4_Init();
  80007d2:	f000 f91b 	bl	8000a0c <MX_SPI4_Init>
-    memcpy(access_log[log_count].uid, uid, 5);
+  MX_USART1_UART_Init();
  80007d6:	f000 f94f 	bl	8000a78 <MX_USART1_UART_Init>
-    log_count++;
-  }
-}
+  /* USER CODE BEGIN 2 */
+  struct Time set_time, get_time;
+  char buff[50];
 
-void ProcessUartCommand(void)
+  set_time.sec = 10;
  80007da:	230a      	movs	r3, #10
  80007dc:	f887 3040 	strb.w	r3, [r7, #64]	@ 0x40
-{
+  set_time.min = 30;
  80007e0:	231e      	movs	r3, #30
  80007e2:	f887 3041 	strb.w	r3, [r7, #65]	@ 0x41
-  char tx[100];
+  set_time.hour = 7;
  80007e6:	2307      	movs	r3, #7
  80007e8:	f887 3042 	strb.w	r3, [r7, #66]	@ 0x42
-  uint8_t i;
- 80007ec:	2301      	movs	r3, #1
+  set_time.weekday = 2;
+ 80007ec:	2302      	movs	r3, #2
  80007ee:	f887 3043 	strb.w	r3, [r7, #67]	@ 0x43
-  unsigned int b0, b1, b2, b3, b4;
- 80007f2:	2311      	movs	r3, #17
+  set_time.day = 10;
+ 80007f2:	230a      	movs	r3, #10
  80007f4:	f887 3044 	strb.w	r3, [r7, #68]	@ 0x44
-  if (strcmp(uart_cmd, "HELP") == 0)
- 80007f8:	2304      	movs	r3, #4
+  set_time.month = 5;
+ 80007f8:	2305      	movs	r3, #5
  80007fa:	f887 3045 	strb.w	r3, [r7, #69]	@ 0x45
-  {
- 80007fe:	2319      	movs	r3, #25
+  set_time.year = 26;
+ 80007fe:	231a      	movs	r3, #26
  8000800:	f887 3046 	strb.w	r3, [r7, #70]	@ 0x46
-	  sprintf(tx, "CMD: HELP, LOG, CLEAR, SETCARD XX XX XX XX XX\r\n");
-    HAL_UART_Transmit(&huart1, (uint8_t *)tx, strlen(tx), 1000);
-  }
+
+  #if DS1307_SET_TIME_ONCE
+  SetTime(&set_time);
  8000804:	f107 0340 	add.w	r3, r7, #64	@ 0x40
  8000808:	4618      	mov	r0, r3
  800080a:	f7ff ff1f 	bl	800064c <SetTime>
-    for (i = 0; i < log_count; i++)
-    {
-      sprintf(tx,
-              "%02d) %02d:%02d:%02d %02d/%02d/20%02d UID=%02X %02X %02X %02X %02X\r\n",
-              i + 1,
-              access_log[i].time.hour,
+  while (1)
+  {
+    /* USER CODE END WHILE */
+
+    /* USER CODE BEGIN 3 */
+	  if (GetTime(&get_time) == HAL_OK)
  800080e:	f107 0338 	add.w	r3, r7, #56	@ 0x38
  8000812:	4618      	mov	r0, r3
  8000814:	f7ff ff68 	bl	80006e8 <GetTime>
  8000818:	4603      	mov	r3, r0
  800081a:	2b00      	cmp	r3, #0
  800081c:	d129      	bne.n	8000872 <main+0xb6>
-              access_log[i].time.min,
-              access_log[i].time.sec,
-              access_log[i].time.day,
+	  {
+	    sprintf(buff, "%02d:%02d:%02d-%02d-%02d/%02d/%02d\r\n",
+	            get_time.hour,
  800081e:	f897 303a 	ldrb.w	r3, [r7, #58]	@ 0x3a
-              access_log[i].time.sec,
+	    sprintf(buff, "%02d:%02d:%02d-%02d-%02d/%02d/%02d\r\n",
  8000822:	461e      	mov	r6, r3
-              access_log[i].time.month,
+	            get_time.min,
  8000824:	f897 3039 	ldrb.w	r3, [r7, #57]	@ 0x39
-              access_log[i].time.sec,
+	    sprintf(buff, "%02d:%02d:%02d-%02d-%02d/%02d/%02d\r\n",
  8000828:	469c      	mov	ip, r3
-              access_log[i].time.year,
+	            get_time.sec,
  800082a:	f897 3038 	ldrb.w	r3, [r7, #56]	@ 0x38
-              access_log[i].uid[0],
+	            get_time.weekday,
  800082e:	f897 203b 	ldrb.w	r2, [r7, #59]	@ 0x3b
-              access_log[i].uid[1],
+	            get_time.day,
  8000832:	f897 103c 	ldrb.w	r1, [r7, #60]	@ 0x3c
-              access_log[i].uid[2],
+	            get_time.month,
  8000836:	f897 003d 	ldrb.w	r0, [r7, #61]	@ 0x3d
-              access_log[i].time.sec,
+	    sprintf(buff, "%02d:%02d:%02d-%02d-%02d/%02d/%02d\r\n",
  800083a:	4604      	mov	r4, r0
-              access_log[i].uid[3],
+	            get_time.year);
  800083c:	f897 003e 	ldrb.w	r0, [r7, #62]	@ 0x3e
-              access_log[i].time.sec,
+	    sprintf(buff, "%02d:%02d:%02d-%02d-%02d/%02d/%02d\r\n",
  8000840:	4605      	mov	r5, r0
  8000842:	1d38      	adds	r0, r7, #4
  8000844:	9504      	str	r5, [sp, #16]
@@ -825,8 +825,8 @@ void ProcessUartCommand(void)
  8000850:	4632      	mov	r2, r6
  8000852:	4913      	ldr	r1, [pc, #76]	@ (80008a0 <main+0xe4>)
  8000854:	f003 f8c0 	bl	80039d8 <siprintf>
-              access_log[i].uid[4]);
-      HAL_UART_Transmit(&huart1, (uint8_t *)tx, strlen(tx), 1000);
+
+	    HAL_UART_Transmit(&huart1, (uint8_t *)buff, strlen(buff), 1000);
  8000858:	1d3b      	adds	r3, r7, #4
  800085a:	4618      	mov	r0, r3
  800085c:	f7ff fcc8 	bl	80001f0 <strlen>
@@ -837,15 +837,15 @@ void ProcessUartCommand(void)
  800086a:	480e      	ldr	r0, [pc, #56]	@ (80008a4 <main+0xe8>)
  800086c:	f002 fcf9 	bl	8003262 <HAL_UART_Transmit>
  8000870:	e010      	b.n	8000894 <main+0xd8>
-    }
-  }
-  else if (sscanf(uart_cmd, "SETCARD %x %x %x %x %x", &b0, &b1, &b2, &b3, &b4) == 5)
-  {
+	  }
+	  else
+	  {
+	    sprintf(buff, "DS1307 read error\r\n");
  8000872:	1d3b      	adds	r3, r7, #4
  8000874:	490c      	ldr	r1, [pc, #48]	@ (80008a8 <main+0xec>)
  8000876:	4618      	mov	r0, r3
  8000878:	f003 f8ae 	bl	80039d8 <siprintf>
-    valid_card[0] = (uint8_t)b0;
+	    HAL_UART_Transmit(&huart1, (uint8_t *)buff, strlen(buff), 1000);
  800087c:	1d3b      	adds	r3, r7, #4
  800087e:	4618      	mov	r0, r3
  8000880:	f7ff fcb6 	bl	80001f0 <strlen>
@@ -855,12 +855,12 @@ void ProcessUartCommand(void)
  800088a:	f44f 737a 	mov.w	r3, #1000	@ 0x3e8
  800088e:	4805      	ldr	r0, [pc, #20]	@ (80008a4 <main+0xe8>)
  8000890:	f002 fce7 	bl	8003262 <HAL_UART_Transmit>
-    valid_card[1] = (uint8_t)b1;
-    valid_card[2] = (uint8_t)b2;
-    valid_card[3] = (uint8_t)b3;
+	  }
+
+	  HAL_Delay(500);
  8000894:	f44f 70fa 	mov.w	r0, #500	@ 0x1f4
  8000898:	f000 fbb2 	bl	8001000 <HAL_Delay>
-              access_log[i].time.hour,
+	  if (GetTime(&get_time) == HAL_OK)
  800089c:	e7b7      	b.n	800080e <main+0x52>
  800089e:	bf00      	nop
  80008a0:	08004330 	.word	0x08004330
@@ -868,22 +868,22 @@ void ProcessUartCommand(void)
  80008a8:	08004358 	.word	0x08004358
 
 080008ac <SystemClock_Config>:
-            valid_card[1],
-            valid_card[2],
-            valid_card[3],
-            valid_card[4]);
-    HAL_UART_Transmit(&huart1, (uint8_t *)tx, strlen(tx), 1000);
-  }
+/**
+  * @brief System Clock Configuration
+  * @retval None
+  */
+void SystemClock_Config(void)
+{
  80008ac:	b580      	push	{r7, lr}
  80008ae:	b094      	sub	sp, #80	@ 0x50
  80008b0:	af00      	add	r7, sp, #0
-  else if (strcmp(uart_cmd, "CLEAR") == 0)
+  RCC_OscInitTypeDef RCC_OscInitStruct = {0};
  80008b2:	f107 0320 	add.w	r3, r7, #32
  80008b6:	2230      	movs	r2, #48	@ 0x30
  80008b8:	2100      	movs	r1, #0
  80008ba:	4618      	mov	r0, r3
  80008bc:	f003 f8ae 	bl	8003a1c <memset>
-  {
+  RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
  80008c0:	f107 030c 	add.w	r3, r7, #12
  80008c4:	2200      	movs	r2, #0
  80008c6:	601a      	str	r2, [r3, #0]
@@ -891,10 +891,10 @@ void ProcessUartCommand(void)
  80008ca:	609a      	str	r2, [r3, #8]
  80008cc:	60da      	str	r2, [r3, #12]
  80008ce:	611a      	str	r2, [r3, #16]
-    log_count = 0;
-    sprintf(tx, "LOG CLEARED\r\n");
-    HAL_UART_Transmit(&huart1, (uint8_t *)tx, strlen(tx), 1000);
-  }
+
+  /** Configure the main internal regulator output voltage
+  */
+  __HAL_RCC_PWR_CLK_ENABLE();
  80008d0:	2300      	movs	r3, #0
  80008d2:	60bb      	str	r3, [r7, #8]
  80008d4:	4b2b      	ldr	r3, [pc, #172]	@ (8000984 <SystemClock_Config+0xd8>)
@@ -907,7 +907,7 @@ void ProcessUartCommand(void)
  80008e4:	f003 5380 	and.w	r3, r3, #268435456	@ 0x10000000
  80008e8:	60bb      	str	r3, [r7, #8]
  80008ea:	68bb      	ldr	r3, [r7, #8]
-  else
+  __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
  80008ec:	2300      	movs	r3, #0
  80008ee:	607b      	str	r3, [r7, #4]
  80008f0:	4b25      	ldr	r3, [pc, #148]	@ (8000988 <SystemClock_Config+0xdc>)
@@ -920,78 +920,78 @@ void ProcessUartCommand(void)
  8000900:	f403 4340 	and.w	r3, r3, #49152	@ 0xc000
  8000904:	607b      	str	r3, [r7, #4]
  8000906:	687b      	ldr	r3, [r7, #4]
-  {
-    sprintf(tx, "UNKNOWN CMD\r\n");
-    HAL_UART_Transmit(&huart1, (uint8_t *)tx, strlen(tx), 1000);
-  }
 
+  /** Initializes the RCC Oscillators according to the specified parameters
+  * in the RCC_OscInitTypeDef structure.
+  */
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
  8000908:	2301      	movs	r3, #1
  800090a:	623b      	str	r3, [r7, #32]
-  uart_cmd_index = 0;
+  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
  800090c:	f44f 3380 	mov.w	r3, #65536	@ 0x10000
  8000910:	627b      	str	r3, [r7, #36]	@ 0x24
-  uart_cmd_ready = 0;
+  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
  8000912:	2302      	movs	r3, #2
  8000914:	63bb      	str	r3, [r7, #56]	@ 0x38
-  memset(uart_cmd, 0, sizeof(uart_cmd));
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
  8000916:	f44f 0380 	mov.w	r3, #4194304	@ 0x400000
  800091a:	63fb      	str	r3, [r7, #60]	@ 0x3c
-}
+  RCC_OscInitStruct.PLL.PLLM = 4;
  800091c:	2304      	movs	r3, #4
  800091e:	643b      	str	r3, [r7, #64]	@ 0x40
-/* USER CODE END 0 */
+  RCC_OscInitStruct.PLL.PLLN = 180;
  8000920:	23b4      	movs	r3, #180	@ 0xb4
  8000922:	647b      	str	r3, [r7, #68]	@ 0x44
-
+  RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
  8000924:	2302      	movs	r3, #2
  8000926:	64bb      	str	r3, [r7, #72]	@ 0x48
-/**
+  RCC_OscInitStruct.PLL.PLLQ = 4;
  8000928:	2304      	movs	r3, #4
  800092a:	64fb      	str	r3, [r7, #76]	@ 0x4c
-  * @brief  The application entry point.
+  if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
  800092c:	f107 0320 	add.w	r3, r7, #32
  8000930:	4618      	mov	r0, r3
  8000932:	f001 ff25 	bl	8002780 <HAL_RCC_OscConfig>
  8000936:	4603      	mov	r3, r0
  8000938:	2b00      	cmp	r3, #0
  800093a:	d001      	beq.n	8000940 <SystemClock_Config+0x94>
-  * @retval int
-  */
+  {
+    Error_Handler();
  800093c:	f000 f924 	bl	8000b88 <Error_Handler>
-int main(void)
-{
+  }
 
-  /* USER CODE BEGIN 1 */
-
+  /** Activate the Over-Drive mode
+  */
+  if (HAL_PWREx_EnableOverDrive() != HAL_OK)
  8000940:	f001 fece 	bl	80026e0 <HAL_PWREx_EnableOverDrive>
  8000944:	4603      	mov	r3, r0
  8000946:	2b00      	cmp	r3, #0
  8000948:	d001      	beq.n	800094e <SystemClock_Config+0xa2>
-  /* USER CODE END 1 */
-
+  {
+    Error_Handler();
  800094a:	f000 f91d 	bl	8000b88 <Error_Handler>
-  /* MCU Configuration--------------------------------------------------------*/
+  }
 
-  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
-  HAL_Init();
-
+  /** Initializes the CPU, AHB and APB buses clocks
+  */
+  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
  800094e:	230f      	movs	r3, #15
  8000950:	60fb      	str	r3, [r7, #12]
-  /* USER CODE BEGIN Init */
-
+                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
  8000952:	2302      	movs	r3, #2
  8000954:	613b      	str	r3, [r7, #16]
-  /* USER CODE END Init */
+  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
  8000956:	2300      	movs	r3, #0
  8000958:	617b      	str	r3, [r7, #20]
-
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
  800095a:	f44f 53a0 	mov.w	r3, #5120	@ 0x1400
  800095e:	61bb      	str	r3, [r7, #24]
-  /* Configure the system clock */
+  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV4;
  8000960:	f44f 53a0 	mov.w	r3, #5120	@ 0x1400
  8000964:	61fb      	str	r3, [r7, #28]
-  SystemClock_Config();
 
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_5) != HAL_OK)
  8000966:	f107 030c 	add.w	r3, r7, #12
  800096a:	2105      	movs	r1, #5
  800096c:	4618      	mov	r0, r3
@@ -999,11 +999,11 @@ int main(void)
  8000972:	4603      	mov	r3, r0
  8000974:	2b00      	cmp	r3, #0
  8000976:	d001      	beq.n	800097c <SystemClock_Config+0xd0>
-  /* USER CODE BEGIN SysInit */
-
+  {
+    Error_Handler();
  8000978:	f000 f906 	bl	8000b88 <Error_Handler>
-  /* USER CODE END SysInit */
-
+  }
+}
  800097c:	bf00      	nop
  800097e:	3750      	adds	r7, #80	@ 0x50
  8000980:	46bd      	mov	sp, r7
@@ -1012,247 +1012,247 @@ int main(void)
  8000988:	40007000 	.word	0x40007000
 
 0800098c <MX_I2C3_Init>:
-  MX_I2C3_Init();
-  MX_SPI4_Init();
-  MX_USART1_UART_Init();
-  /* USER CODE BEGIN 2 */
-  struct Time set_time, get_time;
-  char buff[50];
+  * @brief I2C3 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_I2C3_Init(void)
+{
  800098c:	b580      	push	{r7, lr}
  800098e:	af00      	add	r7, sp, #0
-  set_time.hour = 7;
-  set_time.weekday = 1;
-  set_time.day = 17;
-  set_time.month = 4;
-  set_time.year = 25;
+  /* USER CODE END I2C3_Init 0 */
 
+  /* USER CODE BEGIN I2C3_Init 1 */
+
+  /* USER CODE END I2C3_Init 1 */
+  hi2c3.Instance = I2C3;
  8000990:	4b1b      	ldr	r3, [pc, #108]	@ (8000a00 <MX_I2C3_Init+0x74>)
  8000992:	4a1c      	ldr	r2, [pc, #112]	@ (8000a04 <MX_I2C3_Init+0x78>)
  8000994:	601a      	str	r2, [r3, #0]
-  #if DS1307_SET_TIME_ONCE
+  hi2c3.Init.ClockSpeed = 100000;
  8000996:	4b1a      	ldr	r3, [pc, #104]	@ (8000a00 <MX_I2C3_Init+0x74>)
  8000998:	4a1b      	ldr	r2, [pc, #108]	@ (8000a08 <MX_I2C3_Init+0x7c>)
  800099a:	605a      	str	r2, [r3, #4]
-  SetTime(&set_time);
+  hi2c3.Init.DutyCycle = I2C_DUTYCYCLE_2;
  800099c:	4b18      	ldr	r3, [pc, #96]	@ (8000a00 <MX_I2C3_Init+0x74>)
  800099e:	2200      	movs	r2, #0
  80009a0:	609a      	str	r2, [r3, #8]
-  #endif
+  hi2c3.Init.OwnAddress1 = 0;
  80009a2:	4b17      	ldr	r3, [pc, #92]	@ (8000a00 <MX_I2C3_Init+0x74>)
  80009a4:	2200      	movs	r2, #0
  80009a6:	60da      	str	r2, [r3, #12]
-
+  hi2c3.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
  80009a8:	4b15      	ldr	r3, [pc, #84]	@ (8000a00 <MX_I2C3_Init+0x74>)
  80009aa:	f44f 4280 	mov.w	r2, #16384	@ 0x4000
  80009ae:	611a      	str	r2, [r3, #16]
-  if (SH1106_Init())
+  hi2c3.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
  80009b0:	4b13      	ldr	r3, [pc, #76]	@ (8000a00 <MX_I2C3_Init+0x74>)
  80009b2:	2200      	movs	r2, #0
  80009b4:	615a      	str	r2, [r3, #20]
-  {
+  hi2c3.Init.OwnAddress2 = 0;
  80009b6:	4b12      	ldr	r3, [pc, #72]	@ (8000a00 <MX_I2C3_Init+0x74>)
  80009b8:	2200      	movs	r2, #0
  80009ba:	619a      	str	r2, [r3, #24]
-    sprintf(buff, "%s", "RC522 RFID");
+  hi2c3.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
  80009bc:	4b10      	ldr	r3, [pc, #64]	@ (8000a00 <MX_I2C3_Init+0x74>)
  80009be:	2200      	movs	r2, #0
  80009c0:	61da      	str	r2, [r3, #28]
-    SH1106_GotoXY(12, 10);
+  hi2c3.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
  80009c2:	4b0f      	ldr	r3, [pc, #60]	@ (8000a00 <MX_I2C3_Init+0x74>)
  80009c4:	2200      	movs	r2, #0
  80009c6:	621a      	str	r2, [r3, #32]
-    SH1106_Puts(buff, &Font_11x18, 1);
+  if (HAL_I2C_Init(&hi2c3) != HAL_OK)
  80009c8:	480d      	ldr	r0, [pc, #52]	@ (8000a00 <MX_I2C3_Init+0x74>)
  80009ca:	f000 fde9 	bl	80015a0 <HAL_I2C_Init>
  80009ce:	4603      	mov	r3, r0
  80009d0:	2b00      	cmp	r3, #0
  80009d2:	d001      	beq.n	80009d8 <MX_I2C3_Init+0x4c>
-    SH1106_UpdateScreen();
-    HAL_Delay(1000);
+  {
+    Error_Handler();
  80009d4:	f000 f8d8 	bl	8000b88 <Error_Handler>
   }
-  else
-  {
-    sprintf(buff, "SH1106 init error\r\n");
-    HAL_UART_Transmit(&huart1, (uint8_t *)buff, strlen(buff), 1000);
+
+  /** Configure Analogue filter
+  */
+  if (HAL_I2CEx_ConfigAnalogFilter(&hi2c3, I2C_ANALOGFILTER_ENABLE) != HAL_OK)
  80009d8:	2100      	movs	r1, #0
  80009da:	4809      	ldr	r0, [pc, #36]	@ (8000a00 <MX_I2C3_Init+0x74>)
  80009dc:	f001 fe04 	bl	80025e8 <HAL_I2CEx_ConfigAnalogFilter>
  80009e0:	4603      	mov	r3, r0
  80009e2:	2b00      	cmp	r3, #0
  80009e4:	d001      	beq.n	80009ea <MX_I2C3_Init+0x5e>
+  {
+    Error_Handler();
+ 80009e6:	f000 f8cf 	bl	8000b88 <Error_Handler>
   }
 
- 80009e6:	f000 f8cf 	bl	8000b88 <Error_Handler>
-  TM_MFRC522_Init();
-
-  LED3_OFF();
-  LED4_OFF();
-
+  /** Configure Digital filter
+  */
+  if (HAL_I2CEx_ConfigDigitalFilter(&hi2c3, 0) != HAL_OK)
  80009ea:	2100      	movs	r1, #0
  80009ec:	4804      	ldr	r0, [pc, #16]	@ (8000a00 <MX_I2C3_Init+0x74>)
  80009ee:	f001 fe37 	bl	8002660 <HAL_I2CEx_ConfigDigitalFilter>
  80009f2:	4603      	mov	r3, r0
  80009f4:	2b00      	cmp	r3, #0
  80009f6:	d001      	beq.n	80009fc <MX_I2C3_Init+0x70>
-  HAL_UART_Receive_IT(&huart1, &uart_rx_char, 1);
-  /* USER CODE END 2 */
- 80009f8:	f000 f8c6 	bl	8000b88 <Error_Handler>
-
-  /* Infinite loop */
-  /* USER CODE BEGIN WHILE */
-  while (1)
   {
-    /* USER CODE END WHILE */
+    Error_Handler();
+ 80009f8:	f000 f8c6 	bl	8000b88 <Error_Handler>
+  }
+  /* USER CODE BEGIN I2C3_Init 2 */
+
+  /* USER CODE END I2C3_Init 2 */
+
+}
  80009fc:	bf00      	nop
  80009fe:	bd80      	pop	{r7, pc}
  8000a00:	20000078 	.word	0x20000078
  8000a04:	40005c00 	.word	0x40005c00
- 8000a08:	00061a80 	.word	0x00061a80
+ 8000a08:	000186a0 	.word	0x000186a0
 
 08000a0c <MX_SPI4_Init>:
-	  if (TM_MFRC522_Check(rfid_id) == MI_OK)
-	  {
-		  if (card_detected == 0)
-		  {
-		    card_detected = 1;
-		  }
+  * @brief SPI4 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_SPI4_Init(void)
+{
  8000a0c:	b580      	push	{r7, lr}
  8000a0e:	af00      	add	r7, sp, #0
-	      card_authorized = 1;
-	      LED4_ON();
 
-	      if (card_detected == 1)
-	      {
-	        if (GetTime(&get_time) == HAL_OK)
+  /* USER CODE BEGIN SPI4_Init 1 */
+
+  /* USER CODE END SPI4_Init 1 */
+  /* SPI4 parameter configuration*/
+  hspi4.Instance = SPI4;
  8000a10:	4b17      	ldr	r3, [pc, #92]	@ (8000a70 <MX_SPI4_Init+0x64>)
  8000a12:	4a18      	ldr	r2, [pc, #96]	@ (8000a74 <MX_SPI4_Init+0x68>)
  8000a14:	601a      	str	r2, [r3, #0]
-	        {
+  hspi4.Init.Mode = SPI_MODE_MASTER;
  8000a16:	4b16      	ldr	r3, [pc, #88]	@ (8000a70 <MX_SPI4_Init+0x64>)
  8000a18:	f44f 7282 	mov.w	r2, #260	@ 0x104
  8000a1c:	605a      	str	r2, [r3, #4]
-	          SaveLog(&get_time, rfid_id);
+  hspi4.Init.Direction = SPI_DIRECTION_2LINES;
  8000a1e:	4b14      	ldr	r3, [pc, #80]	@ (8000a70 <MX_SPI4_Init+0x64>)
  8000a20:	2200      	movs	r2, #0
  8000a22:	609a      	str	r2, [r3, #8]
-	        }
+  hspi4.Init.DataSize = SPI_DATASIZE_8BIT;
  8000a24:	4b12      	ldr	r3, [pc, #72]	@ (8000a70 <MX_SPI4_Init+0x64>)
  8000a26:	2200      	movs	r2, #0
  8000a28:	60da      	str	r2, [r3, #12]
-	      }
+  hspi4.Init.CLKPolarity = SPI_POLARITY_LOW;
  8000a2a:	4b11      	ldr	r3, [pc, #68]	@ (8000a70 <MX_SPI4_Init+0x64>)
  8000a2c:	2200      	movs	r2, #0
  8000a2e:	611a      	str	r2, [r3, #16]
-	    }
+  hspi4.Init.CLKPhase = SPI_PHASE_1EDGE;
  8000a30:	4b0f      	ldr	r3, [pc, #60]	@ (8000a70 <MX_SPI4_Init+0x64>)
  8000a32:	2200      	movs	r2, #0
  8000a34:	615a      	str	r2, [r3, #20]
-	    else
+  hspi4.Init.NSS = SPI_NSS_SOFT;
  8000a36:	4b0e      	ldr	r3, [pc, #56]	@ (8000a70 <MX_SPI4_Init+0x64>)
  8000a38:	f44f 7200 	mov.w	r2, #512	@ 0x200
  8000a3c:	619a      	str	r2, [r3, #24]
-	    {
+  hspi4.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
  8000a3e:	4b0c      	ldr	r3, [pc, #48]	@ (8000a70 <MX_SPI4_Init+0x64>)
  8000a40:	2200      	movs	r2, #0
  8000a42:	61da      	str	r2, [r3, #28]
-	      card_authorized = 0;
+  hspi4.Init.FirstBit = SPI_FIRSTBIT_MSB;
  8000a44:	4b0a      	ldr	r3, [pc, #40]	@ (8000a70 <MX_SPI4_Init+0x64>)
  8000a46:	2200      	movs	r2, #0
  8000a48:	621a      	str	r2, [r3, #32]
-	      LED4_OFF();
+  hspi4.Init.TIMode = SPI_TIMODE_DISABLE;
  8000a4a:	4b09      	ldr	r3, [pc, #36]	@ (8000a70 <MX_SPI4_Init+0x64>)
  8000a4c:	2200      	movs	r2, #0
  8000a4e:	625a      	str	r2, [r3, #36]	@ 0x24
-	    }
+  hspi4.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
  8000a50:	4b07      	ldr	r3, [pc, #28]	@ (8000a70 <MX_SPI4_Init+0x64>)
  8000a52:	2200      	movs	r2, #0
  8000a54:	629a      	str	r2, [r3, #40]	@ 0x28
-	    card_detected = 2;
+  hspi4.Init.CRCPolynomial = 10;
  8000a56:	4b06      	ldr	r3, [pc, #24]	@ (8000a70 <MX_SPI4_Init+0x64>)
  8000a58:	220a      	movs	r2, #10
  8000a5a:	62da      	str	r2, [r3, #44]	@ 0x2c
-
+  if (HAL_SPI_Init(&hspi4) != HAL_OK)
  8000a5c:	4804      	ldr	r0, [pc, #16]	@ (8000a70 <MX_SPI4_Init+0x64>)
  8000a5e:	f002 fb27 	bl	80030b0 <HAL_SPI_Init>
  8000a62:	4603      	mov	r3, r0
  8000a64:	2b00      	cmp	r3, #0
  8000a66:	d001      	beq.n	8000a6c <MX_SPI4_Init+0x60>
-	    SH1106_Fill(SH1106_COLOR_BLACK);
-
+  {
+    Error_Handler();
  8000a68:	f000 f88e 	bl	8000b88 <Error_Handler>
-	    if (card_authorized)
-	    {
-	      SH1106_GotoXY(10, 0);
-	      SH1106_Puts("Welcome", &Font_11x18, SH1106_COLOR_WHITE);
-	    }
-	    else
+  }
+  /* USER CODE BEGIN SPI4_Init 2 */
+
+  /* USER CODE END SPI4_Init 2 */
+
+}
  8000a6c:	bf00      	nop
  8000a6e:	bd80      	pop	{r7, pc}
  8000a70:	200000cc 	.word	0x200000cc
  8000a74:	40013400 	.word	0x40013400
 
 08000a78 <MX_USART1_UART_Init>:
-	      SH1106_Puts("Rejected", &Font_11x18, SH1106_COLOR_WHITE);
-	    }
-
-	    sprintf(buff, "%02X %02X %02X %02X %02X",
-	            rfid_id[0],
-	            rfid_id[1],
+  * @brief USART1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_USART1_UART_Init(void)
+{
  8000a78:	b580      	push	{r7, lr}
  8000a7a:	af00      	add	r7, sp, #0
+  /* USER CODE END USART1_Init 0 */
 
-	    SH1106_GotoXY(0, 30);
-	    SH1106_Puts(buff, &Font_7x10, SH1106_COLOR_WHITE);
-	    SH1106_UpdateScreen();
+  /* USER CODE BEGIN USART1_Init 1 */
 
-	    sprintf(buff, "%s UID: %02X %02X %02X %02X %02X\r\n",
+  /* USER CODE END USART1_Init 1 */
+  huart1.Instance = USART1;
  8000a7c:	4b11      	ldr	r3, [pc, #68]	@ (8000ac4 <MX_USART1_UART_Init+0x4c>)
  8000a7e:	4a12      	ldr	r2, [pc, #72]	@ (8000ac8 <MX_USART1_UART_Init+0x50>)
  8000a80:	601a      	str	r2, [r3, #0]
-	            card_authorized ? "OK" : "REJ",
+  huart1.Init.BaudRate = 115200;
  8000a82:	4b10      	ldr	r3, [pc, #64]	@ (8000ac4 <MX_USART1_UART_Init+0x4c>)
  8000a84:	f44f 32e1 	mov.w	r2, #115200	@ 0x1c200
  8000a88:	605a      	str	r2, [r3, #4]
-	            rfid_id[0],
+  huart1.Init.WordLength = UART_WORDLENGTH_8B;
  8000a8a:	4b0e      	ldr	r3, [pc, #56]	@ (8000ac4 <MX_USART1_UART_Init+0x4c>)
  8000a8c:	2200      	movs	r2, #0
  8000a8e:	609a      	str	r2, [r3, #8]
-	            rfid_id[1],
+  huart1.Init.StopBits = UART_STOPBITS_1;
  8000a90:	4b0c      	ldr	r3, [pc, #48]	@ (8000ac4 <MX_USART1_UART_Init+0x4c>)
  8000a92:	2200      	movs	r2, #0
  8000a94:	60da      	str	r2, [r3, #12]
-	            rfid_id[2],
+  huart1.Init.Parity = UART_PARITY_NONE;
  8000a96:	4b0b      	ldr	r3, [pc, #44]	@ (8000ac4 <MX_USART1_UART_Init+0x4c>)
  8000a98:	2200      	movs	r2, #0
  8000a9a:	611a      	str	r2, [r3, #16]
-	            rfid_id[3],
+  huart1.Init.Mode = UART_MODE_TX_RX;
  8000a9c:	4b09      	ldr	r3, [pc, #36]	@ (8000ac4 <MX_USART1_UART_Init+0x4c>)
  8000a9e:	220c      	movs	r2, #12
  8000aa0:	615a      	str	r2, [r3, #20]
-	            rfid_id[4]);
+  huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
  8000aa2:	4b08      	ldr	r3, [pc, #32]	@ (8000ac4 <MX_USART1_UART_Init+0x4c>)
  8000aa4:	2200      	movs	r2, #0
  8000aa6:	619a      	str	r2, [r3, #24]
-	    HAL_UART_Transmit(&huart1, (uint8_t *)buff, strlen(buff), 1000);
+  huart1.Init.OverSampling = UART_OVERSAMPLING_16;
  8000aa8:	4b06      	ldr	r3, [pc, #24]	@ (8000ac4 <MX_USART1_UART_Init+0x4c>)
  8000aaa:	2200      	movs	r2, #0
  8000aac:	61da      	str	r2, [r3, #28]
-
+  if (HAL_UART_Init(&huart1) != HAL_OK)
  8000aae:	4805      	ldr	r0, [pc, #20]	@ (8000ac4 <MX_USART1_UART_Init+0x4c>)
  8000ab0:	f002 fb87 	bl	80031c2 <HAL_UART_Init>
  8000ab4:	4603      	mov	r3, r0
  8000ab6:	2b00      	cmp	r3, #0
  8000ab8:	d001      	beq.n	8000abe <MX_USART1_UART_Init+0x46>
-	    HAL_Delay(300);
-	  }
+  {
+    Error_Handler();
  8000aba:	f000 f865 	bl	8000b88 <Error_Handler>
-	  else
-	  {
-	    card_detected = 0;
-	    LED3_OFF();
-	    LED4_OFF();
-	    card_authorized = 0;
+  }
+  /* USER CODE BEGIN USART1_Init 2 */
+
+  /* USER CODE END USART1_Init 2 */
+
+}
  8000abe:	bf00      	nop
  8000ac0:	bd80      	pop	{r7, pc}
  8000ac2:	bf00      	nop
@@ -1260,16 +1260,16 @@ int main(void)
  8000ac8:	40011000 	.word	0x40011000
 
 08000acc <MX_GPIO_Init>:
-	    {
-	      SH1106_Fill(SH1106_COLOR_BLACK);
-
-	      sprintf(buff, "%02d:%02d:%02d",
-	              get_time.hour,
-	              get_time.min,
+  * @brief GPIO Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_GPIO_Init(void)
+{
  8000acc:	b580      	push	{r7, lr}
  8000ace:	b08a      	sub	sp, #40	@ 0x28
  8000ad0:	af00      	add	r7, sp, #0
-	              get_time.sec);
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
  8000ad2:	f107 0314 	add.w	r3, r7, #20
  8000ad6:	2200      	movs	r2, #0
  8000ad8:	601a      	str	r2, [r3, #0]
@@ -1277,12 +1277,12 @@ int main(void)
  8000adc:	609a      	str	r2, [r3, #8]
  8000ade:	60da      	str	r2, [r3, #12]
  8000ae0:	611a      	str	r2, [r3, #16]
-	      SH1106_GotoXY(20, 8);
-	      SH1106_Puts(buff, &Font_11x18, SH1106_COLOR_WHITE);
+  /* USER CODE BEGIN MX_GPIO_Init_1 */
 
-	      sprintf(buff, "%02d/%02d/20%02d",
-	              get_time.day,
-	              get_time.month,
+  /* USER CODE END MX_GPIO_Init_1 */
+
+  /* GPIO Ports Clock Enable */
+  __HAL_RCC_GPIOE_CLK_ENABLE();
  8000ae2:	2300      	movs	r3, #0
  8000ae4:	613b      	str	r3, [r7, #16]
  8000ae6:	4b26      	ldr	r3, [pc, #152]	@ (8000b80 <MX_GPIO_Init+0xb4>)
@@ -1295,7 +1295,7 @@ int main(void)
  8000af6:	f003 0310 	and.w	r3, r3, #16
  8000afa:	613b      	str	r3, [r7, #16]
  8000afc:	693b      	ldr	r3, [r7, #16]
-	              get_time.year);
+  __HAL_RCC_GPIOH_CLK_ENABLE();
  8000afe:	2300      	movs	r3, #0
  8000b00:	60fb      	str	r3, [r7, #12]
  8000b02:	4b1f      	ldr	r3, [pc, #124]	@ (8000b80 <MX_GPIO_Init+0xb4>)
@@ -1308,7 +1308,7 @@ int main(void)
  8000b12:	f003 0380 	and.w	r3, r3, #128	@ 0x80
  8000b16:	60fb      	str	r3, [r7, #12]
  8000b18:	68fb      	ldr	r3, [r7, #12]
-	      SH1106_GotoXY(30, 32);
+  __HAL_RCC_GPIOC_CLK_ENABLE();
  8000b1a:	2300      	movs	r3, #0
  8000b1c:	60bb      	str	r3, [r7, #8]
  8000b1e:	4b18      	ldr	r3, [pc, #96]	@ (8000b80 <MX_GPIO_Init+0xb4>)
@@ -1321,7 +1321,7 @@ int main(void)
  8000b2e:	f003 0304 	and.w	r3, r3, #4
  8000b32:	60bb      	str	r3, [r7, #8]
  8000b34:	68bb      	ldr	r3, [r7, #8]
-	      SH1106_Puts(buff, &Font_7x10, SH1106_COLOR_WHITE);
+  __HAL_RCC_GPIOA_CLK_ENABLE();
  8000b36:	2300      	movs	r3, #0
  8000b38:	607b      	str	r3, [r7, #4]
  8000b3a:	4b11      	ldr	r3, [pc, #68]	@ (8000b80 <MX_GPIO_Init+0xb4>)
@@ -1335,36 +1335,36 @@ int main(void)
  8000b4e:	607b      	str	r3, [r7, #4]
  8000b50:	687b      	ldr	r3, [r7, #4]
 
-	      SH1106_UpdateScreen();
-
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOE, GPIO_PIN_4, GPIO_PIN_RESET);
  8000b52:	2200      	movs	r2, #0
  8000b54:	2110      	movs	r1, #16
  8000b56:	480b      	ldr	r0, [pc, #44]	@ (8000b84 <MX_GPIO_Init+0xb8>)
  8000b58:	f000 fd08 	bl	800156c <HAL_GPIO_WritePin>
-	      sprintf(buff, "%02d:%02d:%02d-%02d-%02d/%02d/%02d\r\n",
-	              get_time.hour,
-	              get_time.min,
+
+  /*Configure GPIO pin : PE4 */
+  GPIO_InitStruct.Pin = GPIO_PIN_4;
  8000b5c:	2310      	movs	r3, #16
  8000b5e:	617b      	str	r3, [r7, #20]
-	              get_time.sec,
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
  8000b60:	2301      	movs	r3, #1
  8000b62:	61bb      	str	r3, [r7, #24]
-	              get_time.weekday,
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
  8000b64:	2300      	movs	r3, #0
  8000b66:	61fb      	str	r3, [r7, #28]
-	              get_time.day,
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
  8000b68:	2300      	movs	r3, #0
  8000b6a:	623b      	str	r3, [r7, #32]
-	              get_time.month,
+  HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
  8000b6c:	f107 0314 	add.w	r3, r7, #20
  8000b70:	4619      	mov	r1, r3
  8000b72:	4804      	ldr	r0, [pc, #16]	@ (8000b84 <MX_GPIO_Init+0xb8>)
  8000b74:	f000 fb4e 	bl	8001214 <HAL_GPIO_Init>
-	              get_time.year);
-	      HAL_UART_Transmit(&huart1, (uint8_t *)buff, strlen(buff), 1000);
-	    }
-	    else
-	    {
+
+  /* USER CODE BEGIN MX_GPIO_Init_2 */
+
+  /* USER CODE END MX_GPIO_Init_2 */
+}
  8000b78:	bf00      	nop
  8000b7a:	3728      	adds	r7, #40	@ 0x28
  8000b7c:	46bd      	mov	sp, r7
@@ -1373,12 +1373,12 @@ int main(void)
  8000b84:	40021000 	.word	0x40021000
 
 08000b88 <Error_Handler>:
-	      sprintf(buff, "DS1307 read error\r\n");
-	      HAL_UART_Transmit(&huart1, (uint8_t *)buff, strlen(buff), 1000);
-	    }
-
-	    HAL_Delay(500);
-	  }
+/**
+  * @brief  This function is executed in case of error occurrence.
+  * @retval None
+  */
+void Error_Handler(void)
+{
  8000b88:	b480      	push	{r7}
  8000b8a:	af00      	add	r7, sp, #0
   \details Disables IRQ interrupts by setting special-purpose register PRIMASK.
@@ -1390,10 +1390,10 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  8000b8c:	b672      	cpsid	i
 }
  8000b8e:	bf00      	nop
-
-	  if (uart_cmd_ready)
-	  {
-	    ProcessUartCommand();
+  /* USER CODE BEGIN Error_Handler_Debug */
+  /* User can add his own implementation to report the HAL error return state */
+  __disable_irq();
+  while (1)
  8000b90:	bf00      	nop
  8000b92:	e7fd      	b.n	8000b90 <Error_Handler+0x8>
 
@@ -8559,6 +8559,11 @@ static void UART_EndRxTransfer(UART_HandleTypeDef *huart)
  8003434:	681b      	ldr	r3, [r3, #0]
  8003436:	330c      	adds	r3, #12
  8003438:	637b      	str	r3, [r7, #52]	@ 0x34
+ */
+__STATIC_FORCEINLINE uint32_t __LDREXW(volatile uint32_t *addr)
+{
+    uint32_t result;
+
    __ASM volatile ("ldrex %0, %1" : "=r" (result) : "Q" (*addr) );
  800343a:	6b7b      	ldr	r3, [r7, #52]	@ 0x34
  800343c:	e853 3f00 	ldrex	r3, [r3]
@@ -8573,6 +8578,11 @@ static void UART_EndRxTransfer(UART_HandleTypeDef *huart)
  8003450:	6cfa      	ldr	r2, [r7, #76]	@ 0x4c
  8003452:	643a      	str	r2, [r7, #64]	@ 0x40
  8003454:	63fb      	str	r3, [r7, #60]	@ 0x3c
+ */
+__STATIC_FORCEINLINE uint32_t __STREXW(uint32_t value, volatile uint32_t *addr)
+{
+   uint32_t result;
+
    __ASM volatile ("strex %0, %2, %1" : "=&r" (result), "=Q" (*addr) : "r" (value) );
  8003456:	6bf9      	ldr	r1, [r7, #60]	@ 0x3c
  8003458:	6c3a      	ldr	r2, [r7, #64]	@ 0x40

@@ -35,7 +35,7 @@
 /* USER CODE BEGIN PD */
 #define DS1307_ADDR_WRITE 0xD0
 #define DS1307_ADDR_READ  0xD1
-#define DS1307_SET_TIME_ONCE 1
+#define DS1307_SET_TIME_ONCE 0
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/

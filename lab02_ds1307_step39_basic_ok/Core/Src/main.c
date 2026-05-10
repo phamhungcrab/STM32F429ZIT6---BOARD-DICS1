@@ -34,9 +34,10 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+#define USE_DS1307 1
 #define DS1307_ADDR_WRITE 0xD0
 #define DS1307_ADDR_READ  0xD1
-#define DS1307_SET_TIME_ONCE 1
+#define DS1307_SET_TIME_ONCE 0
 #define LED3_ON()  HAL_GPIO_WritePin(GPIOG, GPIO_PIN_13, GPIO_PIN_SET)
 #define LED3_OFF() HAL_GPIO_WritePin(GPIOG, GPIO_PIN_13, GPIO_PIN_RESET)
 #define LED4_ON()  HAL_GPIO_WritePin(GPIOG, GPIO_PIN_14, GPIO_PIN_SET)
@@ -69,7 +70,7 @@ struct Time
 
 uint8_t rfid_id[5];
 uint8_t card_detected = 0;
-uint8_t valid_card[5] = {0x11, 0x22, 0x33, 0x44, 0x55};
+uint8_t valid_card[5] = {};
 uint8_t card_authorized = 0;
 
 typedef struct
@@ -164,6 +165,18 @@ void ProcessUartCommand(void)
   char tx[100];
   uint8_t i;
   unsigned int b0, b1, b2, b3, b4;
+
+  uint8_t k;
+
+  for (k = 0; uart_cmd[k] != '\0'; k++)
+  {
+    if (uart_cmd[k] >= 'a' && uart_cmd[k] <= 'z')
+    {
+      uart_cmd[k] = uart_cmd[k] - 32;
+    }
+  }
+
+
   if (strcmp(uart_cmd, "HELP") == 0)
   {
 	  sprintf(tx, "CMD: HELP, LOG, CLEAR, SETCARD XX XX XX XX XX\r\n");
@@ -224,6 +237,8 @@ void ProcessUartCommand(void)
   uart_cmd_index = 0;
   uart_cmd_ready = 0;
   memset(uart_cmd, 0, sizeof(uart_cmd));
+
+
 }
 /* USER CODE END 0 */
 
@@ -264,12 +279,12 @@ int main(void)
   char buff[50];
 
   set_time.sec = 10;
-  set_time.min = 30;
-  set_time.hour = 7;
+  set_time.min = 40;
+  set_time.hour = 10;
   set_time.weekday = 1;
-  set_time.day = 17;
-  set_time.month = 4;
-  set_time.year = 25;
+  set_time.day = 10;
+  set_time.month = 5;
+  set_time.year = 26;
 
   #if DS1307_SET_TIME_ONCE
   SetTime(&set_time);
@@ -319,10 +334,12 @@ int main(void)
 
 	      if (card_detected == 1)
 	      {
+	      #if USE_DS1307
 	        if (GetTime(&get_time) == HAL_OK)
 	        {
 	          SaveLog(&get_time, rfid_id);
 	        }
+	      #endif
 	      }
 	    }
 	    else
@@ -549,7 +566,7 @@ static void MX_SPI4_Init(void)
   hspi4.Init.CLKPolarity = SPI_POLARITY_LOW;
   hspi4.Init.CLKPhase = SPI_PHASE_1EDGE;
   hspi4.Init.NSS = SPI_NSS_SOFT;
-  hspi4.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
+  hspi4.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_16;
   hspi4.Init.FirstBit = SPI_FIRSTBIT_MSB;
   hspi4.Init.TIMode = SPI_TIMODE_DISABLE;
   hspi4.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
@@ -646,7 +663,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
   if (huart->Instance == USART1)
   {
-    if (uart_rx_char == '\r' || uart_rx_char == '\n')
+	 if (uart_rx_char == '\r' || uart_rx_char == '\n' || uart_rx_char == '#')
     {
       if (uart_cmd_index > 0)
       {

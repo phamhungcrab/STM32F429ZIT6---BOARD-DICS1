@@ -7,6 +7,7 @@ Screen1View::Screen1View()
 void Screen1View::setupScreen()
 {
     Screen1ViewBase::setupScreen();
+
 }
 
 void Screen1View::tearDownScreen()

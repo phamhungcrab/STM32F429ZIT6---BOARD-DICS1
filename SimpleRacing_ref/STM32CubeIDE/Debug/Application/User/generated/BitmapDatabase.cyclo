@@ -1,0 +1,2 @@
+E:/STM32/SimpleRacing_ref/TouchGFX/generated/images/src/BitmapDatabase.cpp:31:37:const touchgfx::Bitmap::BitmapData* BitmapDatabase::getInstance()	1
+E:/STM32/SimpleRacing_ref/TouchGFX/generated/images/src/BitmapDatabase.cpp:36:10:uint16_t BitmapDatabase::getInstanceSize()	1
