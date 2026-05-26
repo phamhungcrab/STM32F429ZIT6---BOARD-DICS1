@@ -8,18 +8,17 @@
           {
             "Type": "Circle",
             "Name": "circle1",
-            "X": 80,
-            "Y": 120,
-            "Width": 80,
-            "Height": 80,
+            "X": 63,
+            "Y": 6,
+            "Width": 115,
+            "Height": 154,
             "Color": {
-              "Red": 255,
-              "Green": 255,
-              "Blue": 255
+              "Red": 255
             },
-            "CenterX": 40.0,
-            "CenterY": 40.0,
-            "Radius": 10.0,
+            "CenterX": 56.3,
+            "CenterY": 61.4,
+            "Radius": 50.0,
+            "StartAngle": 0.1,
             "EndAngle": 360.0,
             "CapPrecision": "Butt"
           },

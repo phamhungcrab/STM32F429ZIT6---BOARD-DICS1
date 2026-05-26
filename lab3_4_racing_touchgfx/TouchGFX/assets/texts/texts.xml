@@ -11,6 +11,12 @@
       </Text>
     </TextGroup>
     <TextGroup Id="Unsorted">
+      <Text Id="__SingleUse_PCWL" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB">0123456789</Translation>
+      </Text>
+      <Text Id="__SingleUse_T6H4" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB">0123456789</Translation>
+      </Text>
       <Text Id="__SingleUse_0EOV" Alignment="Left" TypographyId="Small">
         <Translation Language="GB">High: &lt;value&gt;</Translation>
       </Text>

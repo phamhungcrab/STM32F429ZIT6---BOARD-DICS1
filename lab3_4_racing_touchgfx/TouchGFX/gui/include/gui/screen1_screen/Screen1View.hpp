@@ -30,7 +30,8 @@ protected:
 
     uint32_t rngState;
 
-    int16_t laneCenterX[3];
+    enum { LANE_COUNT = 4 };
+    int16_t laneCenterX[LANE_COUNT];
     int16_t carY;
 
     touchgfx::Unicode::UnicodeChar scoreBuffer[16];

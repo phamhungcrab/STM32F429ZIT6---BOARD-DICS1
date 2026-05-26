@@ -69,29 +69,35 @@
           {
             "Type": "TextArea",
             "Name": "txtScore",
-            "Width": 42,
+            "Width": 200,
             "Height": 15,
             "TextId": "__SingleUse_CY80",
             "TextRotation": "0",
             "Color": {
               "Red": 255
             },
-            "AutoSize": true,
-            "Wildcard1": {}
+            "Wildcard1": {
+              "TextId": "__SingleUse_PCWL",
+              "UseBuffer": true,
+              "BufferSize": 16
+            }
           },
           {
             "Type": "TextArea",
             "Name": "txtHigh",
             "Y": 15,
-            "Width": 36,
+            "Width": 200,
             "Height": 15,
             "TextId": "__SingleUse_0EOV",
             "TextRotation": "0",
             "Color": {
               "Red": 255
             },
-            "AutoSize": true,
-            "Wildcard1": {}
+            "Wildcard1": {
+              "TextId": "__SingleUse_T6H4",
+              "UseBuffer": true,
+              "BufferSize": 16
+            }
           }
         ],
         "Interactions": [

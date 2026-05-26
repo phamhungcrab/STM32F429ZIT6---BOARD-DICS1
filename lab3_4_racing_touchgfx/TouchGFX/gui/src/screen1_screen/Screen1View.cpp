@@ -4,7 +4,7 @@
 extern "C" {
     extern osMessageQueueId_t GameCtrlQueueHandle;
 }
-
+static uint16_t savedHighScore = 0;
 Screen1View::Screen1View()
     : tickCount(0),
       roadFrame(0),
@@ -18,9 +18,10 @@ Screen1View::Screen1View()
       rngState(0x12345678),
       carY(235)
 {
-    laneCenterX[0] = 60;
-    laneCenterX[1] = 120;
-    laneCenterX[2] = 180;
+	laneCenterX[0] = 30;
+	laneCenterX[1] = 90;
+	laneCenterX[2] = 150;
+	laneCenterX[3] = 210;
 }
 
 void Screen1View::setupScreen()
@@ -33,6 +34,7 @@ void Screen1View::setupScreen()
 
     playerLane = 1;
     score = 0;
+    highScore = savedHighScore;
     gameSpeed = 2;
 
     txtScore.setWildcard(scoreBuffer);
@@ -85,6 +87,7 @@ void Screen1View::handleTickEvent()
         if (score > highScore)
         {
             highScore = score;
+            savedHighScore = highScore;
         }
 
         score = 0;
@@ -127,9 +130,9 @@ void Screen1View::movePlayer(int8_t dir)
     {
         newLane = 0;
     }
-    if (newLane > 2)
+    if (newLane > LANE_COUNT - 1)
     {
-        newLane = 2;
+        newLane = LANE_COUNT - 1;
     }
 
     if (newLane != playerLane)
@@ -142,7 +145,7 @@ void Screen1View::movePlayer(int8_t dir)
 void Screen1View::respawnObstacle()
 {
     rngState = 1664525U * rngState + 1013904223U;
-    obstacleLane = rngState % 3;
+    obstacleLane = rngState % LANE_COUNT;
 
     obstacleY = -(int16_t)obstacle.getHeight();
 
@@ -166,6 +169,7 @@ void Screen1View::updateObstacle()
         if (score > highScore)
         {
             highScore = score;
+            savedHighScore = highScore;
         }
 
         if ((score % 5 == 0) && (gameSpeed < 8))
@@ -206,8 +210,14 @@ bool Screen1View::checkCollision() const
 
 void Screen1View::updateTexts()
 {
-    touchgfx::Unicode::snprintf(scoreBuffer, 16, "%u", score);
-    touchgfx::Unicode::snprintf(highBuffer, 16, "%u", highScore);
+    txtScore.invalidate();
+    txtHigh.invalidate();
+
+    touchgfx::Unicode::snprintf(scoreBuffer, 16, "%d", score);
+    touchgfx::Unicode::snprintf(highBuffer, 16, "%d", highScore);
+
+    txtScore.resizeToCurrentText();
+    txtHigh.resizeToCurrentText();
 
     txtScore.invalidate();
     txtHigh.invalidate();
