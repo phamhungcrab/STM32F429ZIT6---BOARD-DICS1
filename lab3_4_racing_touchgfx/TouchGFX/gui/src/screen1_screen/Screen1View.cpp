@@ -84,17 +84,19 @@ void Screen1View::handleTickEvent()
 
     if (checkCollision())
     {
+        score++;
+
         if (score > highScore)
         {
             highScore = score;
             savedHighScore = highScore;
         }
 
-        score = 0;
-        gameSpeed = 2;
-        playerLane = 1;
+        if ((score % 5 == 0) && (gameSpeed < 8))
+        {
+            gameSpeed++;
+        }
 
-        updateCar();
         updateTexts();
         respawnObstacle();
     }
